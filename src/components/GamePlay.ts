@@ -61,16 +61,15 @@ export class GamePlay {
         })
       )
     );
-    this.generateMines();
+    this.mineGenerated = false;
   }
 
-  generateMines(initialBlock?: BlockState) {
+  generateMines(initialBlock: BlockState) {
     for (let row of this.state.value) {
       for (let col of row) {
         if (
-          initialBlock &&
-          (Math.abs(initialBlock.x - col.x) <= 1 ||
-            Math.abs(initialBlock.y - col.y) <= 1)
+          Math.abs(initialBlock.x - col.x) <= 1 ||
+          Math.abs(initialBlock.y - col.y) <= 1
         )
           continue;
         col.mine = Math.random() < 0.2;
@@ -134,12 +133,10 @@ export class GamePlay {
     }
     this.expandZero(item);
     item.revealed = true;
-    this.checkMatchResult();
   }
 
   onRightClick(item: BlockState) {
     item.flagged = !item.flagged;
-    this.checkMatchResult();
   }
 
   checkMatchResult() {
