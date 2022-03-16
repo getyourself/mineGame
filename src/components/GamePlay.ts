@@ -1,5 +1,5 @@
 import { BlockState } from "./../types/block";
-import { ref, Ref } from "vue";
+import { ref, Ref, watchEffect } from "vue";
 import { dev } from "../configs/dev";
 
 const directions = [
