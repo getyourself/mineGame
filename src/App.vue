@@ -1,15 +1,10 @@
 <script setup lang="ts">
 // This starter template is using Vue 3 <script setup> SFCs
 // Check out https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup
-import { ref, Ref, watchEffect } from "vue";
 import Block from "./components/Block.vue";
 import { GamePlay } from "./components/GamePlay";
 
-let game = new GamePlay(10, 10);
-watchEffect(() => {
-  game.checkMatchResult();
-  console.log("match result changed");
-});
+let game = new GamePlay(10, 10, 10);
 </script>
 
 <template>
