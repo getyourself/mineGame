@@ -14,21 +14,29 @@ const directions = [
   { x: 1, y: -1 },
 ];
 
+enum MatchResult {
+  FAIL,
+  SUCCESS,
+  PENDING,
+}
+
 export class GamePlay {
   width: number;
   height: number;
-  matchResult: Ref<String>;
+  matchResult: Ref<MatchResult>;
   mineGenerated: boolean;
   state: Ref<BlockState[][]> = ref<BlockState[][]>([]);
   dev: Ref<boolean>;
   mines: number;
+  time: number;
   constructor(width: number, height: number, mines: number) {
     this.width = width;
     this.height = height;
-    this.matchResult = ref("game start");
+    this.matchResult = ref(MatchResult.PENDING);
     this.mineGenerated = false;
     this.dev = dev;
     this.mines = mines;
+    this.time = Date.now();
     this.state = ref(
       Array.from({ length: this.width }, (_, y) =>
         Array.from(
@@ -43,18 +51,27 @@ export class GamePlay {
         )
       )
     );
-    watchEffect(() => {
-      this.checkMatchResult();
-    });
+  }
+
+  get cells() {
+    return this.state.value.flat();
+  }
+
+  get win() {
+    return this.matchResult.value === MatchResult.SUCCESS;
   }
 
   changeDev() {
     dev.value = !dev.value;
   }
 
-  resetMines() {
+  resetMines(width?: number, height?: number, mines?: number) {
+    this.width = width || this.width;
+    this.height = height || this.height;
+    this.mines = mines || this.mines;
     this.dev.value = false;
-    this.matchResult.value = "game start";
+    this.matchResult.value = MatchResult.PENDING;
+    this.time = Date.now();
     this.state.value = Array.from({ length: this.width }, (_, y) =>
       Array.from(
         { length: this.height },
@@ -152,7 +169,7 @@ export class GamePlay {
 
   onClick(item: BlockState) {
     if (item.mine) {
-      this.matchResult.value = "you lose";
+      this.matchResult.value = MatchResult.FAIL;
       dev.value = true;
       return;
     }
@@ -161,6 +178,7 @@ export class GamePlay {
     }
     this.expandZero(item);
     item.revealed = true;
+    item.flagged = false;
   }
 
   onRightClick(item: BlockState) {
@@ -180,14 +198,14 @@ export class GamePlay {
           return cell.revealed || (cell.flagged && cell.mine);
         })
       ) {
-        this.matchResult.value = "you win";
+        this.matchResult.value = MatchResult.SUCCESS;
         confetti({
           particleCount: 100,
           spread: 70,
           origin: { y: 0.6 },
         });
       } else {
-        this.matchResult.value = "you lose";
+        this.matchResult.value = MatchResult.FAIL;
       }
     }
   }
